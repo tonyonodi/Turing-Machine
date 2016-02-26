@@ -126,6 +126,11 @@
 (def machine-running
   (reagent/atom false))
 
+(js/setInterval
+  #(if @machine-running
+    (swap! machine-description machine-iter))
+  500)
+
 
 
 (defn home-page []
@@ -136,7 +141,7 @@
         (if @machine-running "Stop" "Run")]
       [:button
         {:on-click (if (not @machine-running)
-                      #(swap! machine-description machine-iter))} 
+                      #(swap! machine-description machine-iter))}
                    "Step"]]])
 
 (defn current-page []
