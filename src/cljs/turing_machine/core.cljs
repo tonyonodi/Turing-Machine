@@ -25,7 +25,7 @@
     ; S2, keep moving right until you hit 1, write "a", S3
     ["S2" "a" "S2" "a" "right"]
     ["S2" "1" "S3" "a" "left"]
-    ["S2" blank "halt" blank "left"]
+    ["S2" blank "S8" blank "left"]
     ; S3, keep moving left until you hit - -> S4
     ["S3" ":" "S3" ":" "left"]
     ["S3" "a" "S3" "a" "left"]
@@ -50,6 +50,13 @@
     ; when you hit - -> S1
     ["S7" "b" "S7" "1" "left"]
     ["S7" "-" "S1" "-" "right"]
+    ; keep moving left overwriting everything until you get to -
+    ; could hit
+    ["S8" "a" "S8" blank "left"]
+    ["S8" "b" "S8" blank "left"]
+    ["S8" "1" "S8" blank "left"]
+    ["S8" ":" "S8" blank "left"]
+    ["S8" "-" "halt" blank "left"]
   ]
   })
 
