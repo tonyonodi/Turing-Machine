@@ -18,7 +18,7 @@
     ; current state, current symbol (can be :any), next state, next symbol, action (:left, :right, :halt)
     ["init" "-" "one" "a" "right"]
     ["one" "1" "one" "m" "right"]
-    ["one" ":" "two" ":" "halt"]
+    ["one" ":" "halt" ":" "none"]
   ]
   })
 
@@ -39,7 +39,8 @@
     (some instruction-filter instructions)))
 
 (defn machine-iter [description]
-  (if (:position description) ; position isn't nil (halted)
+  (if (= (:state description) "halt")
+    description
     (let [position (:position description)
         tape (:tape description)
         instructions (:instructions description)
@@ -55,11 +56,10 @@
       :position (cond
         (= action "right") (inc position)
         (= action "left") (dec position)
-        (= action "halt") nil)
+        (= action "none") position)
       :state next-state
       :instructions instructions
-      })
-    nil))
+      })))
 
 (defn instruction-table [instructions]
   [:table
