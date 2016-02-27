@@ -13,12 +13,36 @@
 (def initial-description {
   :tape {0 "-", 1 "1", 2 "1", 3 "1", 4 "1", 5 ":", 6 "1", 7 "1"}
   :position 0
-  :state "init"
+  :state "S1"
   :instructions [
     ; current state, current symbol (can be :any), next state, next symbol, action (:left, :right, :halt)
-    ["init" "-" "one" "a" "right"]
-    ["one" "1" "one" "m" "right"]
-    ["one" ":" "halt" ":" "none"]
+
+    ; S1, keep moving right until you hit :
+    ["S1" "-" "S1" "-" "right"]
+    ["S1" "1" "S1" "1" "right"]
+    ["S1" "b" "S1" "b" "right"]
+    ["S1" ":" "S2" ":" "right"]
+    ; S2, keep moving right until you hit 1, write "a", S3
+    ["S2" "a" "S2" "a" "right"]
+    ["S2" "1" "S3" "a" "left"]
+    ["S2" " " "halt" " " "left"]
+    ; S3, keep moving left until you hit - -> S4
+    ["S3" ":" "S3" ":" "left"]
+    ["S3" "a" "S3" "a" "left"]
+    ["S3" "b" "S3" "b" "left"]
+    ["S3" "1" "S3" "1" "left"]
+    ["S3" "-" "S4" "-" "right"]
+    ; S4, keep moving right until you hit 1, wtite "b" -> S5
+    ; if you hit : -> S2
+    ["S4" "b" "S4" "b" "right"]
+    ["S4" "1" "S5" "b" "left"]
+    ["S4" ":" "S2" ":" "right"]
+    ; S5, move left until you hit " ", write 1 -> S1
+    ; could hit b, = or 1
+    ["S5" "b" "S5" "b" "left"]
+    ["S5" "-" "S5" "-" "left"]
+    ["S5" "1" "S5" "1" "left"]
+    ["S5" " " "S3" "1" "right"]
   ]
   })
 
@@ -66,9 +90,9 @@
     {:class "instructions"}
     [:tr
       [:th "State"]
-      [:th "Symbol"]
+      [:th "Read Symbol"]
       [:th "Next state"]
-      [:th "Next symbol"]
+      [:th "Write symbol"]
       [:th "action"]]
       (for [instruction instructions]
         (let [row (:instruction instruction)
@@ -87,7 +111,7 @@
        (:val item)])])
 
 (defn enumerate-tape [tape position]
-  (let [buffer 8
+  (let [buffer 10
         tape-range
         (range
           (- position (- buffer 1))
@@ -118,7 +142,7 @@
           (:position description))]
     [:div {:class "machine"}
       [instruction-table instructions]
-      [:h3 "Halted: " (str (= (:state description) "halt"))]
+      [:h3 "State: " (str (:state description))]
       [list-tape tape]]))
 
 (def machine-description
