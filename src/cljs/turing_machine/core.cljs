@@ -20,12 +20,12 @@
     ; S1, keep moving right until you hit :
     ["S1" "-" "S1" "-" "right"]
     ["S1" "1" "S1" "1" "right"]
-    ["S1" "b" "S1" "b" "right"]
+    ["S1" "b" "S1" "b" "right"] ; can probably remove
     ["S1" ":" "S2" ":" "right"]
     ; S2, keep moving right until you hit 1, write "a", S3
     ["S2" "a" "S2" "a" "right"]
     ["S2" "1" "S3" "a" "left"]
-    ["S2" " " "halt" " " "left"]
+    ["S2" blank "halt" blank "left"]
     ; S3, keep moving left until you hit - -> S4
     ["S3" ":" "S3" ":" "left"]
     ["S3" "a" "S3" "a" "left"]
@@ -36,13 +36,20 @@
     ; if you hit : -> S2
     ["S4" "b" "S4" "b" "right"]
     ["S4" "1" "S5" "b" "left"]
-    ["S4" ":" "S2" ":" "right"]
-    ; S5, move left until you hit " ", write 1 -> S1
+    ["S4" ":" "S7" ":" "left"]
+    ; S5, move left until you hit " ", write 1 -> S6
     ; could hit b, = or 1
     ["S5" "b" "S5" "b" "left"]
     ["S5" "-" "S5" "-" "left"]
     ["S5" "1" "S5" "1" "left"]
-    ["S5" " " "S3" "1" "right"]
+    ["S5" blank "S6" "1" "right"]
+    ; S6 keep moving right until you hit - -> S4
+    ["S6" "1" "S6" "1" "right"]
+    ["S6" "-" "S4" "-" "right"]
+    ; S7 move left overwriting bs with 1s until -
+    ; when you hit - -> S1
+    ["S7" "b" "S7" "1" "left"]
+    ["S7" "-" "S1" "-" "right"]
   ]
   })
 
