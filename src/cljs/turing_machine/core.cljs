@@ -118,6 +118,7 @@
           (:position description))]
     [:div {:class "machine"}
       [instruction-table instructions]
+      [:h3 "Halted: " (str (= (:state description) "halt"))]
       [list-tape tape]]))
 
 (def machine-description
@@ -131,8 +132,6 @@
     (swap! machine-description machine-iter))
   500)
 
-
-
 (defn home-page []
   [:div [:h2 "Turing Machine"]
     (show-machine @machine-description)
@@ -142,7 +141,10 @@
       [:button
         {:on-click (if (not @machine-running)
                       #(swap! machine-description machine-iter))}
-                   "Step"]]])
+                   "Step"]
+      [:button
+        {:on-click #(do (reset! machine-description initial-description)
+                        (reset! machine-running false))} "Reset"]]])
 
 (defn current-page []
   [:div [(session/get :current-page)]])
