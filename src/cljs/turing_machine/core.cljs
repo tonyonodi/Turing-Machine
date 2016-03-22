@@ -11,52 +11,52 @@
 (def blank "\u00a0")
 
 (def initial-description {
-  :tape {0 "-", 1 "1", 2 "1", 3 "1", 4 "1", 5 ":", 6 "1", 7 "1"}
+  :tape {0 "-", 1 "1", 2 "1", 3 "1", 4 ":", 5 "1", 6 "1"}
   :position 0
   :state "S1"
   :instructions [
-    ; current state, current symbol (can be :any), next state, next symbol, action (:left, :right, :halt)
+    ; current state, current symbol (can be :any), next state, next symbol, action
 
     ; S1, keep moving right until you hit :
-    ["S1" "-" "S1" "-" "right"]
-    ["S1" "1" "S1" "1" "right"]
-    ["S1" "b" "S1" "b" "right"] ; can probably remove
-    ["S1" ":" "S2" ":" "right"]
-    ; S2, keep moving right until you hit 1, write "a", S3
-    ["S2" "a" "S2" "a" "right"]
-    ["S2" "1" "S3" "a" "left"]
-    ["S2" blank "S8" blank "left"]
-    ; S3, keep moving left until you hit - -> S4
-    ["S3" ":" "S3" ":" "left"]
-    ["S3" "a" "S3" "a" "left"]
-    ["S3" "b" "S3" "b" "left"]
-    ["S3" "1" "S3" "1" "left"]
-    ["S3" "-" "S4" "-" "right"]
-    ; S4, keep moving right until you hit 1, wtite "b" -> S5
+    ["S1" "-" "S1" "-" "R"]
+    ["S1" "1" "S1" "1" "R"]
+    ["S1" "b" "S1" "b" "R"] ; can probably remove
+    ["S1" ":" "S2" ":" "R"]
+    ; S2, keep moving R until you hit 1, write "a", S3
+    ["S2" "a" "S2" "a" "R"]
+    ["S2" "1" "S3" "a" "L"]
+    ["S2" blank "S8" blank "L"]
+    ; S3, keep moving L until you hit - -> S4
+    ["S3" ":" "S3" ":" "L"]
+    ["S3" "a" "S3" "a" "L"]
+    ["S3" "b" "S3" "b" "L"]
+    ["S3" "1" "S3" "1" "L"]
+    ["S3" "-" "S4" "-" "R"]
+    ; S4, keep moving R until you hit 1, wtite "b" -> S5
     ; if you hit : -> S2
-    ["S4" "b" "S4" "b" "right"]
-    ["S4" "1" "S5" "b" "left"]
-    ["S4" ":" "S7" ":" "left"]
-    ; S5, move left until you hit " ", write 1 -> S6
+    ["S4" "b" "S4" "b" "R"]
+    ["S4" "1" "S5" "b" "L"]
+    ["S4" ":" "S7" ":" "L"]
+    ; S5, move L until you hit " ", write 1 -> S6
     ; could hit b, = or 1
-    ["S5" "b" "S5" "b" "left"]
-    ["S5" "-" "S5" "-" "left"]
-    ["S5" "1" "S5" "1" "left"]
-    ["S5" blank "S6" "1" "right"]
-    ; S6 keep moving right until you hit - -> S4
-    ["S6" "1" "S6" "1" "right"]
-    ["S6" "-" "S4" "-" "right"]
-    ; S7 move left overwriting bs with 1s until -
+    ["S5" "b" "S5" "b" "L"]
+    ["S5" "-" "S5" "-" "L"]
+    ["S5" "1" "S5" "1" "L"]
+    ["S5" blank "S6" "1" "R"]
+    ; S6 keep moving R until you hit - -> S4
+    ["S6" "1" "S6" "1" "R"]
+    ["S6" "-" "S4" "-" "R"]
+    ; S7 move L overwriting bs with 1s until -
     ; when you hit - -> S1
-    ["S7" "b" "S7" "1" "left"]
-    ["S7" "-" "S1" "-" "right"]
-    ; keep moving left overwriting everything until you get to -
+    ["S7" "b" "S7" "1" "L"]
+    ["S7" "-" "S1" "-" "R"]
+    ; keep moving L overwriting everything until you get to -
     ; could hit
-    ["S8" "a" "S8" blank "left"]
-    ["S8" "b" "S8" blank "left"]
-    ["S8" "1" "S8" blank "left"]
-    ["S8" ":" "S8" blank "left"]
-    ["S8" "-" "halt" blank "left"]
+    ["S8" "a" "S8" blank "L"]
+    ["S8" "b" "S8" blank "L"]
+    ["S8" "1" "S8" blank "L"]
+    ["S8" ":" "S8" blank "L"]
+    ["S8" "-" "halt" blank "L"]
   ]
   })
 
@@ -92,8 +92,8 @@
       {
       :tape (assoc tape position next-symbol)
       :position (cond
-        (= action "right") (inc position)
-        (= action "left") (dec position)
+        (= action "R") (inc position)
+        (= action "L") (dec position)
         (= action "none") position)
       :state next-state
       :instructions instructions
