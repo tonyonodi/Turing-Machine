@@ -95,9 +95,9 @@
         state (:state description)
         tape-value (get-tape-value tape position)
         next-instruction (next-instruction instructions state tape-value)
-        next-state (next-instruction 2)
-        next-symbol (next-instruction 3)
-        action (next-instruction 4)
+        next-state (next-instruction 1)
+        next-symbol (next-instruction 2)
+        action (next-instruction 3)
         ]
       {
       :tape (assoc tape position next-symbol)
