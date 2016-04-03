@@ -111,29 +111,34 @@
 
 (defn state-row
   "Render an instruction row that is meant to show state."
-  [current-state row]
+  [is-curr-state row]
   (let [state (first row)
         instructions (rest row)
-        state-selected (if (= state current-state) "state-selected" "")]
+        state-selected (if is-curr-state "state-selected" "")]
     [:tr {:class "state-row"} (conj (vector :td {:class state-selected} state)
             (map #(vector :td %) instructions))]))
 
 (defn normal-row
   "Render an instruction row with no state (left pad)."
-  [row]
-    (into [:tr [:td ""]] (map #(vector :td %) row)))
+  [is-curr-state symbol row]
+    (let [is-selected (and is-curr-state (= symbol (read-symbol row)))]
+      (into [:tr {:class (if is-selected "selected" "")} [:td ""]]
+            (map #(vector :td %) row))))
 
 (defn single-state-table
   "Render the instructions for a single state."
-  [state state-instructions]
+  [state symbol state-instructions]
         (let [first-row (into [(first state-instructions)]
                           (first (last state-instructions)))
               rest-rows (rest (last state-instructions))
-              row-count (count (last state-instructions))]
-        (cons (state-row state first-row)
-          (map normal-row rest-rows))))
+              state-selected (= state (first state-instructions))]
+        (cons (state-row state-selected first-row)
+          (map (partial normal-row state-selected symbol)
+            rest-rows))))
 
-(defn instruction-table [instructions state]
+(defn instruction-table
+  "Create table element and then loop over each item in instruction map."
+  [symbol state instructions]
   (let [state-table instructions]
     [:table
       {:class "instructions"}
@@ -144,7 +149,7 @@
         [:th "Write symbol"]
         [:th "action"]]
         (let [rows (apply concat
-                      (map (partial single-state-table state) instructions))]
+                      (map (partial single-state-table state symbol) instructions))]
           rows)]))
 
 (defn list-tape [items]
@@ -170,9 +175,10 @@
   (let [tape (enumerate-tape
           (:tape description) (:position description))
         instructions (:instructions description)
+        symbol (get-tape-value (:tape description) (:position description))
         state (:state description)]
     [:div {:class "machine"}
-      [instruction-table instructions state]
+      [instruction-table symbol state instructions]
       [:h3 "State: " (str (:state description))]
       [list-tape tape]]))
 
