@@ -106,6 +106,15 @@
       :instructions instructions
       })))
 
+(defn single-state-table
+  [state-instructions]
+        (let [first-row (into [(first state-instructions)]
+                          (first (last state-instructions)))
+              rest-rows (rest (last state-instructions))]
+        (cons [:tr (map #(vector :td %) first-row)]
+          (map (fn [row]
+                  (into [:tr] (map #(vector :td %) row))) rest-rows))))
+
 (defn instruction-table [instructions]
   (let [state-table instructions]
     [:table
@@ -116,15 +125,9 @@
         [:th "Next state"]
         [:th "Write symbol"]
         [:th "action"]]
-        (for [instruction instructions]
-          (let [row (:instruction instruction)
-                selected (:selected instruction)]
-            [:tr {:class (if selected "selected" "")}
-              [:td (row 0)]
-              [:td (row 1)]
-              [:td (row 2)]
-              [:td (row 3)]
-              [:td (row 4)]]))]))
+        (let [rows (apply concat
+                      (map single-state-table instructions))]
+          rows)]))
 
 (defn list-tape [items]
   [:ul {:class "tape"}
@@ -145,28 +148,10 @@
              })
       tape-range)))
 
-(defn format-state [instructions state]
-  [:div {:class "instruction-state"}
-    [:h2 state]
-    [instruction-table instructions]])
-
-(defn format-instructions [instructions state tape position]
-  (let [tape-value (get-tape-value tape position)
-        selected-instruction (next-instruction instructions state tape-value)
-        format-instruction
-          (fn [instruction]
-            {:instruction instruction
-             :selected (= selected-instruction instruction)})]
-    (map instruction-table instructions)))
-
 (defn show-machine [description]
   (let [tape (enumerate-tape
           (:tape description) (:position description))
-        instructions (format-instructions
-          (:instructions description)
-          (:state description)
-          (:tape description)
-          (:position description))]
+        instructions (:instructions description)]
     [:div {:class "machine"}
       [instruction-table instructions]
       [:h3 "State: " (str (:state description))]
