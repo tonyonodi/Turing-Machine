@@ -10,55 +10,68 @@
 
 (def blank "\u00a0")
 
+; Wrapper functions to retrieve parts of an instruction
+(defn read-symbol [instruction]
+  (instruction 0))
+
+(defn next-state [instruction]
+  (instruction 1))
+
+(defn write-symbol [instruction]
+  (instruction 2))
+
+(defn action [instruction]
+  (instruction 3))
+
 (def initial-description {
   :tape {0 "-", 1 "1", 2 "1", 3 "1", 4 ":", 5 "1", 6 "1"}
   :position 0
   :state "S1"
-  :instructions [
+  :instructions {
     ; current state, current symbol (can be :any), next state, next symbol, action
 
     ; S1, keep moving right until you hit :
-    ["S1" "-" "S1" "-" "R"]
-    ["S1" "1" "S1" "1" "R"]
-    ["S1" "b" "S1" "b" "R"] ; can probably remove
-    ["S1" ":" "S2" ":" "R"]
+    "S1" [["-" "S1" "-" "R"]
+          ["1" "S1" "1" "R"]
+          ["b" "S1" "b" "R"] ; can probably remove
+          [":" "S2" ":" "R"]]
     ; S2, keep moving R until you hit 1, write "a", S3
-    ["S2" "a" "S2" "a" "R"]
-    ["S2" "1" "S3" "a" "L"]
-    ["S2" blank "S8" blank "L"]
+    "S2" [["a" "S2" "a" "R"]
+          ["1" "S3" "a" "L"]
+          [blank "S8" blank "L"]]
     ; S3, keep moving L until you hit - -> S4
-    ["S3" ":" "S3" ":" "L"]
-    ["S3" "a" "S3" "a" "L"]
-    ["S3" "b" "S3" "b" "L"]
-    ["S3" "1" "S3" "1" "L"]
-    ["S3" "-" "S4" "-" "R"]
+    "S3" [[":" "S3" ":" "L"]
+          ["a" "S3" "a" "L"]
+          ["b" "S3" "b" "L"]
+          ["1" "S3" "1" "L"]
+          ["-" "S4" "-" "R"]]
     ; S4, keep moving R until you hit 1, wtite "b" -> S5
     ; if you hit : -> S2
-    ["S4" "b" "S4" "b" "R"]
-    ["S4" "1" "S5" "b" "L"]
-    ["S4" ":" "S7" ":" "L"]
+    "S4" [["b" "S4" "b" "R"]
+          ["1" "S5" "b" "L"]
+          [":" "S7" ":" "L"]]
     ; S5, move L until you hit " ", write 1 -> S6
     ; could hit b, = or 1
-    ["S5" "b" "S5" "b" "L"]
-    ["S5" "-" "S5" "-" "L"]
-    ["S5" "1" "S5" "1" "L"]
-    ["S5" blank "S6" "1" "R"]
+    "S5" [["b" "S5" "b" "L"]
+          ["-" "S5" "-" "L"]
+          ["1" "S5" "1" "L"]
+          [blank "S6" "1" "R"]]
     ; S6 keep moving R until you hit - -> S4
-    ["S6" "1" "S6" "1" "R"]
-    ["S6" "-" "S4" "-" "R"]
+    "S6" [["1" "S6" "1" "R"]
+          ["-" "S4" "-" "R"]]
     ; S7 move L overwriting bs with 1s until -
     ; when you hit - -> S1
-    ["S7" "b" "S7" "1" "L"]
-    ["S7" "-" "S1" "-" "R"]
+    "S7" [["b" "S7" "1" "L"]
+          ["-" "S1" "-" "R"]]
     ; keep moving L overwriting everything until you get to -
     ; could hit
-    ["S8" "a" "S8" blank "L"]
-    ["S8" "b" "S8" blank "L"]
-    ["S8" "1" "S8" blank "L"]
-    ["S8" ":" "S8" blank "L"]
-    ["S8" "-" "halt" blank "L"]
-  ]
-  })
+    "S8" [["a" "S8" blank "L"]
+          ["b" "S8" blank "L"]
+          ["1" "S8" blank "L"]
+          [":" "S8" blank "L"]
+          ["-" "halt" blank "L"]]
+  }
+})
 
 (defn get-tape-value [tape index]
   "Returns the value of the tape map at index if it has one, otherwise Returns
@@ -66,15 +79,9 @@
   (if-let [val (get tape index)] val blank))
 
 (defn next-instruction [instructions state tape-value]
-  (let [instruction-filter
-          (fn [instruction]
-            (let [instruction-state (instruction 0)
-                  instruction-stymbol (instruction 1)]
-                  (when
-                    (and (= state instruction-state)
-                      (= tape-value instruction-stymbol))
-                    instruction)))]
-    (some instruction-filter instructions)))
+  (let [state-instructions (get instructions state)
+        match-symbol (fn [row] (= (read-symbol row) tape-value))]
+    (some match-symbol state-instructions)))
 
 (defn machine-iter [description]
   (if (= (:state description) "halt")
@@ -100,23 +107,24 @@
       })))
 
 (defn instruction-table [instructions]
-  [:table
-    {:class "instructions"}
-    [:tr
-      [:th "State"]
-      [:th "Read Symbol"]
-      [:th "Next state"]
-      [:th "Write symbol"]
-      [:th "action"]]
-      (for [instruction instructions]
-        (let [row (:instruction instruction)
-              selected (:selected instruction)]
-          [:tr {:class (if selected "selected" "")}
-            [:td (row 0)]
-            [:td (row 1)]
-            [:td (row 2)]
-            [:td (row 3)]
-            [:td (row 4)]]))])
+  (let [state-table instructions]
+    [:table
+      {:class "instructions"}
+      [:tr
+        [:th "State"]
+        [:th "Read Symbol"]
+        [:th "Next state"]
+        [:th "Write symbol"]
+        [:th "action"]]
+        (for [instruction instructions]
+          (let [row (:instruction instruction)
+                selected (:selected instruction)]
+            [:tr {:class (if selected "selected" "")}
+              [:td (row 0)]
+              [:td (row 1)]
+              [:td (row 2)]
+              [:td (row 3)]
+              [:td (row 4)]]))]))
 
 (defn list-tape [items]
   [:ul {:class "tape"}
@@ -137,6 +145,11 @@
              })
       tape-range)))
 
+(defn format-state [instructions state]
+  [:div {:class "instruction-state"}
+    [:h2 state]
+    [instruction-table instructions]])
+
 (defn format-instructions [instructions state tape position]
   (let [tape-value (get-tape-value tape position)
         selected-instruction (next-instruction instructions state tape-value)
@@ -144,7 +157,7 @@
           (fn [instruction]
             {:instruction instruction
              :selected (= selected-instruction instruction)})]
-    (map format-instruction instructions)))
+    (map instruction-table instructions)))
 
 (defn show-machine [description]
   (let [tape (enumerate-tape
