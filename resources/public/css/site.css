@@ -37,9 +37,16 @@ textarea {
 .machine .state-row {
   border-top: solid 1px #ccc;
 }
-.machine .instructions .selected  td{
+.machine .instructions .selected td {
   border-bottom: solid 2px red;
   border-top: solid 2px red;
+}
+.machine .instructions .state-selected {
+  color: red;
+}
+.machine .instructions .selected td:first-child {
+  border-bottom: none;
+  border-top: none;
 }
 .machine .instructions {
   width: 100%;
