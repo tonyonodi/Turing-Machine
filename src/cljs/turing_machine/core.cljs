@@ -106,14 +106,28 @@
       :instructions instructions
       })))
 
+(defn state-row
+  "Render an instruction row that is meant to show state."
+  [row]
+  (let [state (first row)
+        instructions (rest row)]
+    [:tr {:class "state-row"} (conj (vector :td state)
+            (map #(vector :td %) instructions))]))
+
+(defn normal-row
+  "Render an instruction row with no state (left pad)."
+  [row]
+    (into [:tr [:td ""]] (map #(vector :td %) row)))
+
 (defn single-state-table
+  "Render the instructions for a single state."
   [state-instructions]
         (let [first-row (into [(first state-instructions)]
                           (first (last state-instructions)))
-              rest-rows (rest (last state-instructions))]
-        (cons [:tr (map #(vector :td %) first-row)]
-          (map (fn [row]
-                  (into [:tr] (map #(vector :td %) row))) rest-rows))))
+              rest-rows (rest (last state-instructions))
+              row-count (count (last state-instructions))]
+        (cons (state-row first-row)
+          (map normal-row rest-rows))))
 
 (defn instruction-table [instructions]
   (let [state-table instructions]
