@@ -12,16 +12,16 @@
 
 ; Wrapper functions to retrieve parts of an instruction
 (defn read-symbol [instruction]
-  (instruction 0))
+  (nth instruction 0))
 
 (defn next-state [instruction]
-  (instruction 1))
+  (nth instruction 1))
 
 (defn write-symbol [instruction]
-  (instruction 2))
+  (nth instruction 2))
 
 (defn action [instruction]
-  (instruction 3))
+  (nth instruction 3))
 
 (def initial-description {
   :tape {0 "-", 1 "1", 2 "1", 3 "1", 4 ":", 5 "1", 6 "1"}
@@ -111,12 +111,16 @@
 
 (defn state-row
   "Render an instruction row that is meant to show state."
-  [is-curr-state row]
+  [is-curr-state symbol row]
   (let [state (first row)
         instructions (rest row)
-        state-selected (if is-curr-state "state-selected" "")]
-    [:tr {:class "state-row"} (conj (vector :td {:class state-selected} state)
-            (map #(vector :td %) instructions))]))
+        state-selected (if is-curr-state "state-selected" "")
+        is-curr-symbol (and is-curr-state
+                            (= symbol (read-symbol instructions)))
+        row-selected (if is-curr-symbol " selected" "")]
+    [:tr {:class (str "state-row" row-selected)}
+      (conj [:td {:class state-selected} state]
+        (map #(vector :td %) instructions))]))
 
 (defn normal-row
   "Render an instruction row with no state (left pad)."
@@ -132,7 +136,7 @@
                           (first (last state-instructions)))
               rest-rows (rest (last state-instructions))
               state-selected (= state (first state-instructions))]
-        (cons (state-row state-selected first-row)
+        (cons (state-row state-selected symbol first-row)
           (map (partial normal-row state-selected symbol)
             rest-rows))))
 
