@@ -80,7 +80,10 @@
 
 (defn next-instruction [instructions state tape-value]
   (let [state-instructions (get instructions state)
-        match-symbol (fn [row] (= (read-symbol row) tape-value))]
+        match-symbol (fn [row]
+                      (if (= (read-symbol row) tape-value)
+                        row
+                        nil))]
     (some match-symbol state-instructions)))
 
 (defn machine-iter [description]

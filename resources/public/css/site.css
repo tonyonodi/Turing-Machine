@@ -34,6 +34,9 @@ textarea {
 .machine {
 
 }
+.machine .state-row {
+  border-top: solid 1px #ccc;
+}
 .machine .instructions .selected  td{
   border-bottom: solid 2px red;
   border-top: solid 2px red;
